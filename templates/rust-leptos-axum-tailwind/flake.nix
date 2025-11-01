@@ -75,7 +75,7 @@
         # This project has configured leptos to use Tailwind CSS for inline
         # styling of HTML elements using CSS classes, an CSS styling approach
         # pioneered by the Tailwind CSS project.
-        pkgs.tailwindcss
+        pkgs.tailwindcss_4
       ];
     };
   };

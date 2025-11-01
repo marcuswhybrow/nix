@@ -7,13 +7,13 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-axum = { version = "0.7.9", optional = true, features = ["macros"] }
+axum = { version = "0.8.6", optional = true, features = ["macros"] }
 console_error_panic_hook = "0.1.7"
-leptos = { version = "0.7.7" }
-leptos_meta = { version = "0.7.7" }
-leptos_axum = { version = "0.7.7", optional = true }
-leptos_router = { version = "0.7.7" }
-tokio = { version = "1.44", features = [
+leptos = { version = "0.8.12" }
+leptos_meta = { version = "0.8.5" }
+leptos_axum = { version = "0.8.6", optional = true }
+leptos_router = { version = "0.8.9" }
+tokio = { version = "1.48", features = [
   "rt-multi-thread",
   "macros",
 ], optional = true }
