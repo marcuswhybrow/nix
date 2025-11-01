@@ -1,0 +1,9 @@
+[watch]
+watch = ["./src"]
+
+[serve]
+addresses = ["0.0.0.0"]
+port = 8000
+
+[tools]
+tailwind = "4.1.16"
