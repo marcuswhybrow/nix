@@ -1,3 +1,6 @@
 [submodule "templates/rust-leptos-stores"]
 	path = templates/rust-leptos-stores
 	url = git@github.com:marcuswhybrow/leptos-stores.git
+[submodule "templates/rust-iced"]
+	path = templates/rust-iced
+	url = git@github.com:marcuswhybrow/rust-iced.git
