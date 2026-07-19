@@ -15,6 +15,7 @@ fn main() {
                 ..Default::default()
             },
             viewport: egui::ViewportBuilder::default()
+                .with_min_inner_size([400.0, 400.0])
                 .with_inner_size([800.0, 600.0])
                 .with_transparent(true)
                 .with_decorations(false)
@@ -47,6 +48,7 @@ impl eframe::App for App {
                     draw_resize_handle(ui);
                 });
             });
+        handle_borderless_resizing(ui);
     }
 }
 
@@ -209,14 +211,7 @@ fn draw_resize_handle(ui: &mut egui::Ui) {
     }
 
     if response.dragged() {
-        let delta = response.drag_delta();
-        let current_size = ui.viewport_rect().size();
-        let mut new_size = current_size + delta;
-
-        new_size.x = new_size.x.max(400.0);
-        new_size.y = new_size.y.max(300.0);
-
-        ui.send_viewport_cmd(egui::ViewportCommand::InnerSize(new_size));
+        ui.send_viewport_cmd(egui::ViewportCommand::BeginResize(egui::ResizeDirection::SouthEast));
     }
 }
 
@@ -322,4 +317,50 @@ pub fn render_window_control_button_with_drawn_icon(
     paint(ui.painter(), icon_rect, final_icon_color);
 
     response
+}
+
+fn handle_borderless_resizing(ui: &mut egui::Ui) {
+    // 1. Define how wide your invisible hit-test border should be (e.g., 6 pixels)
+    let border_thickness = 6.0;
+    let window_rect = ui.viewport_rect();
+    let mouse_pos = ui.input(|i| i.pointer.interact_pos());
+
+    if let Some(pos) = mouse_pos {
+        // 2. Check if mouse is near any window edges
+        let left = pos.x < window_rect.min.x + border_thickness;
+        let right = pos.x > window_rect.max.x - border_thickness;
+        let top = pos.y < window_rect.min.y + border_thickness;
+        let bottom = pos.y > window_rect.max.y - border_thickness;
+
+        // 3. Determine the correct winit resize direction
+        use egui::viewport::ResizeDirection;
+        let direction = match (top, bottom, left, right) {
+            (true, false, true, false) => Some(ResizeDirection::NorthWest),
+            (true, false, false, true) => Some(ResizeDirection::NorthEast),
+            (false, true, true, false) => Some(ResizeDirection::SouthWest),
+            (false, true, false, true) => Some(ResizeDirection::SouthEast),
+            (true, false, false, false) => Some(ResizeDirection::North),
+            (false, true, false, false) => Some(ResizeDirection::South),
+            (false, false, true, false) => Some(ResizeDirection::West),
+            (false, false, false, true) => Some(ResizeDirection::East),
+            _ => None,
+        };
+
+        if let Some(dir) = direction {
+            // Change cursor icon to show the user they can resize
+            ui.set_cursor_icon(match dir {
+                ResizeDirection::North | ResizeDirection::South => egui::CursorIcon::ResizeVertical,
+                ResizeDirection::East | ResizeDirection::West => egui::CursorIcon::ResizeHorizontal,
+                ResizeDirection::NorthWest => egui::CursorIcon::ResizeNorthWest,
+                ResizeDirection::SouthEast => egui::CursorIcon::ResizeSouthEast,
+                ResizeDirection::NorthEast => egui::CursorIcon::ResizeNorthEast,
+                ResizeDirection::SouthWest => egui::CursorIcon::ResizeSouthWest,
+            });
+
+            // If the user clicks down on the border, tell the OS to take over the drag-resize
+            if ui.input(|i| i.pointer.any_pressed()) {
+                ui.send_viewport_cmd(egui::ViewportCommand::BeginResize(dir));
+            }
+        }
+    }
 }
